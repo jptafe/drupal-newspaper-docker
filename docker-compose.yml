@@ -6,6 +6,7 @@ version: '3.1'
 services:
   db:
     image: mysql:5.7
+    container_name: drupal-persist
     restart: always
     environment:
       MYSQL_DATABASE: drupal 
@@ -16,6 +17,7 @@ services:
       - ./sql:/docker-entrypoint-initdb.d/:z
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
+    container_name: drupal-phpmyadmin
     environment:
       PMA_HOST: db
       PMA_USER: exampleuser
@@ -26,10 +28,12 @@ services:
       - 8889:80
   drupal:
     image: drupal:9-apache-buster 
+    container_name: drupal-www
     ports:
       - 8888:8080
     restart: always
     volumes:
       - .:/opt
+    working_dir: /opt
     #command: "php -S 0.0.0.0:8080 -t /opt"
-    command: "/opt/drush rs --root=/opt/web --default-server=0.0.0.0:8080/"
+    command: bash -c "composer update && /opt/drush rs -root=web --default-server=0.0.0.0:8080"
